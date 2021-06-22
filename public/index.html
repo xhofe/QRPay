@@ -108,7 +108,11 @@
             console.log(e.target.files[0])
             qrcode.decode(getObjectURL(e.target.files[0]))
             qrcode.callback = content => {
-                document.getElementById(id).value = content
+                if (content.indexOf("error")!==-1){
+                    Message("warning","二维码识别失败，请收手动识别",1000)
+                }else {
+                    document.getElementById(id).value = content
+                }
             }
         })
     }
@@ -149,7 +153,10 @@
             title: document.getElementById("Title").value,
             qq: document.getElementById("QQ").value
         }
-        console.log(data)
+        if (!(data.link&&data.ali_pay&&data.qq&&data.qq_pay&&data.template&&data.title&&data.wechat_pay)){
+            Message("warning","请完整填写",1000)
+            return
+        }
         fetch("/api/create",{
             method: 'POST',
             body: JSON.stringify(data),
@@ -161,7 +168,7 @@
             if (res.code === 200){
                 window.location.href = "/" + data.link
             }else {
-                Message('warning', res.msg, 1000)
+                Message('danger', res.msg, 1000)
             }
         }))
     })

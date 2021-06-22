@@ -29,6 +29,6 @@ func View(c *fiber.Ctx) error {
 	case utils.QQ:
 		return c.Render("qq",Resp{Code: 200,Msg: "success",Data: q})
 	default:
-		return c.Render("themes/"+q.Template,Resp{Code: 200,Msg: "success",Data: q})
+		return c.Render("themes/"+q.Template,Resp{Code: 200,Msg: c.BaseURL(),Data: q})
 	}
 }
