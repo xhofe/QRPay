@@ -6,7 +6,9 @@
     <title>三合一收款码制作</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
-    <script src="js/reqrcode.js"></script>
+<!--    <script src="js/reqrcode.js"></script>-->
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
     <script src="js/message.js"></script>
 </head>
 <body>
@@ -105,15 +107,20 @@
     }
     const setChangeListener = id => {
         document.getElementById(`${id}File`).addEventListener("change",e=>{
-            console.log(e.target.files[0])
-            qrcode.decode(getObjectURL(e.target.files[0]))
-            qrcode.callback = content => {
-                if (content.indexOf("error")!==-1){
-                    Message("warning","二维码识别失败，请收手动识别",1000)
+            NProgress.start()
+            let data = new FormData()
+            data.append("img_file", e.target.files[0])
+            fetch("https://api.xhofe.top/dqr/?pin=true",{
+                method: 'POST',
+                body: data
+            }).then(resp=>resp.json().then(res=>{
+                NProgress.done()
+                if (res.status===1){
+                    document.getElementById(id).value = res.qrtext
                 }else {
-                    document.getElementById(id).value = content
+                    Message("warning",res.msg,2000)
                 }
-            }
+            }))
         })
     }
     setChangeListener("AliPay")
@@ -154,7 +161,7 @@
             qq: document.getElementById("QQ").value
         }
         if (!(data.link&&data.ali_pay&&data.qq&&data.qq_pay&&data.template&&data.title&&data.wechat_pay)){
-            Message("warning","请完整填写",1000)
+            Message("warning","请完整填写",2000)
             return
         }
         fetch("/api/create",{
@@ -168,7 +175,7 @@
             if (res.code === 200){
                 window.location.href = "/" + data.link
             }else {
-                Message('danger', res.msg, 1000)
+                Message('danger', res.msg, 2000)
             }
         }))
     })
