@@ -21,5 +21,5 @@ func main() {
 	}))
 	InitView(app)
 	InitApiRouter(app)
-	_ = app.Listen(":3000")
+	_ = app.Listen(":5244")
 }
